@@ -18,7 +18,7 @@ export function Topbar({
   return (
     <header className="flex flex-col gap-4 rounded-4xl bg-linear-to-r from-red-700 via-red-600 to-yellow-500 p-6 text-white shadow-[0_30px_90px_rgba(153,27,27,0.28)] md:flex-row md:items-end md:justify-between">
       <div className="space-y-3">
-        <Badge className="bg-white/20 text-white hover:bg-white/30">Mapa social interactivo</Badge>
+        <Badge className="bg-white/20 text-red-500 hover:bg-white/30">Mapa social interactivo</Badge>
         <div>
           <h1 className="text-3xl font-black tracking-tight md:text-5xl">
             Perú en tiempo casi real

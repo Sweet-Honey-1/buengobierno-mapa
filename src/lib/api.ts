@@ -19,15 +19,13 @@ function toTopItems(record: Record<string, number>, limit = 8): RankingItem[] {
     .map(([label, value]) => ({ label, value }))
 }
 
+// MEJORA: Normalizador robusto para cruzar datos de Supabase y GeoJSON
 export function toReadableDepartmentCode(raw: string): DepartmentCode | null {
+  if (!raw) return null;
+  // Quita tildes, convierte a mayúsculas y quita espacios (ej. "San Martín" -> "SANMARTIN")
   const normalized = raw.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "");
+  
   if (normalized in departmentMeta) return normalized as DepartmentCode;
-  
-  // Casos especiales para el GeoJSON
-  if (normalized === 'MADREDEDIOS') return 'MADREDEDIOS';
-  if (normalized === 'LALIBERTAD') return 'LALIBERTAD';
-  if (normalized === 'SANMARTIN') return 'SANMARTIN';
-  
   return null;
 }
 
@@ -52,7 +50,7 @@ export async function submitReport(payload: SubmissionPayload): Promise<void> {
     ubicacion: payload.ubicacion,
     dolencia: payload.dolencia.trim(),
     status: 'pending',
-    source: 'spa',
+    source: 'spa', // Opcional, si tu BD lo usa
   })
 
   if (error) throw error
@@ -63,7 +61,7 @@ export async function fetchDashboard(): Promise<DashboardViewModel> {
     .from('dashboard_cache')
     .select('payload')
     .eq('cache_key', 'latest')
-    .maybeSingle()
+    .single() // Usamos single() como lo tenías originalmente
 
   if (error) throw error
 
@@ -76,12 +74,7 @@ export async function fetchDashboard(): Promise<DashboardViewModel> {
         topSectors: [],
         topPhrases: [],
         topTerms: [],
-        stats: [
-          { label: 'Reportes procesados', value: 0, accent: 'red' },
-          { label: 'Departamentos con señal', value: 0, accent: 'yellow' },
-          { label: 'Sector dominante', value: 'Sin datos', accent: 'red' },
-          { label: 'Frase más repetida', value: 'Sin datos', accent: 'yellow' },
-        ],
+        stats: [],
       },
       departments: {},
     }
@@ -109,10 +102,7 @@ export async function fetchDashboard(): Promise<DashboardViewModel> {
 
     const sortedSectors = Object.entries(sectorRecord)
       .sort((a, b) => b[1] - a[1])
-      .map(([sectorId, value]) => ({
-        label: sectorId,
-        value,
-      }))
+      .map(([sectorId, value]) => ({ label: sectorId, value }))
 
     const dominant = sortedSectors[0]
 
