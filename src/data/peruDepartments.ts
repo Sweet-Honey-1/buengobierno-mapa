@@ -1,0 +1,30 @@
+// src/data/peruDepartments.ts
+import type { DepartmentCode } from '../types/domain'
+
+export const departmentMeta: Record<DepartmentCode, { label: string }> = {
+  AMAZONAS: { label: 'Amazonas' },
+  ANCASH: { label: 'Áncash' },
+  APURIMAC: { label: 'Apurímac' },
+  AREQUIPA: { label: 'Arequipa' },
+  AYACUCHO: { label: 'Ayacucho' },
+  CAJAMARCA: { label: 'Cajamarca' },
+  CALLAO: { label: 'Callao' },
+  CUSCO: { label: 'Cusco' },
+  HUANCAVELICA: { label: 'Huancavelica' },
+  HUANUCO: { label: 'Huánuco' },
+  ICA: { label: 'Ica' },
+  JUNIN: { label: 'Junín' },
+  LALIBERTAD: { label: 'La Libertad' },
+  LAMBAYEQUE: { label: 'Lambayeque' },
+  LIMA: { label: 'Lima' },
+  LORETO: { label: 'Loreto' },
+  MADREDEDIOS: { label: 'Madre de Dios' },
+  MOQUEGUA: { label: 'Moquegua' },
+  PASCO: { label: 'Pasco' },
+  PIURA: { label: 'Piura' },
+  PUNO: { label: 'Puno' },
+  SANMARTIN: { label: 'San Martín' },
+  TACNA: { label: 'Tacna' },
+  TUMBES: { label: 'Tumbes' },
+  UCAYALI: { label: 'Ucayali' },
+}
