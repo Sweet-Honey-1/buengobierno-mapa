@@ -1,5 +1,5 @@
 // src/components/map/PeruDepartmentMap.tsx
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Card } from '../ui/Card'; // Usando tu Card original
 import type { DepartmentCode, DepartmentDashboard } from '../../types/domain';
 import { toReadableDepartmentCode } from '../../lib/api';
@@ -154,10 +154,10 @@ export function PeruDepartmentMap({
   }, [departments, selectedDepartment, maxScore]);
 
   return (
-    <Card className="relative overflow-hidden p-0 w-full min-h-[500px] flex flex-col">
-      <div className="absolute top-4 left-4 z-[400] bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-neutral-100">
+    <Card className="relative overflow-hidden p-0 w-full min-h-125 flex flex-col">
+      <div className="absolute top-4 left-4 z-400 bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-lg border border-neutral-100">
         <h2 className="text-xl font-black text-red-700">Mapa del Perú</h2>
-        <p className="mt-1 text-xs text-neutral-500 max-w-[200px]">Haz clic en un departamento para ver el detalle territorial.</p>
+        <p className="mt-1 text-xs text-neutral-500 max-w-50">Haz clic en un departamento para ver el detalle territorial.</p>
         
         {/* Leyenda de colores */}
         <div className="mt-4 flex flex-col gap-1 text-[10px] text-neutral-600 font-medium">
@@ -169,14 +169,14 @@ export function PeruDepartmentMap({
       </div>
 
       {loading && (
-        <div className="absolute inset-0 bg-white/80 z-[500] flex flex-col items-center justify-center">
+        <div className="absolute inset-0 bg-white/80 z-500 flex flex-col items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
           <p className="text-red-800 font-medium">Cargando fronteras...</p>
         </div>
       )}
 
       {error && (
-        <div className="absolute inset-0 bg-white/90 z-[500] flex flex-col items-center justify-center p-6 text-center">
+        <div className="absolute inset-0 bg-white/90 z-500 flex flex-col items-center justify-center p-6 text-center">
           <p className="text-red-600 font-bold mb-2">Error</p>
           <p className="text-neutral-600 text-sm">{error}</p>
         </div>
