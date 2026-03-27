@@ -24,7 +24,7 @@ export function Topbar({
             Perú en tiempo casi real
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-red-50/90 md:text-base">
-            Visualiza las dolencias ciudadanas por departamento, detecta sectores dominantes y recoge nuevos reportes desde una sola SPA.
+            Escucha el lamento del pueblo peruano.
           </p>
         </div>
       </div>

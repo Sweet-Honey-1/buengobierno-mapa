@@ -102,7 +102,7 @@ export const ReportForm = () => {
     <>
       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-red-100 relative">
         <h2 className="text-2xl font-bold text-red-700 mb-2">Registrar dolencia ciudadana</h2>
-        <p className="text-gray-500 mb-6 text-sm">El formulario se guarda en Supabase. Luego FastAPI lo procesa y actualiza el dashboard.</p>
+        <p className="text-gray-500 mb-6 text-sm">Este formulario nos ayuda a poder saber nuestra realidad de manera eficaz en base a datos aportados por los peruanos. Puedes completarlo de manera anonima lo que nos importa es poder ayudar a que tu dolencia resuene en todo el territorio Peruano.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Nombre */}
