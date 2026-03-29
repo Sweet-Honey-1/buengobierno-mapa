@@ -172,7 +172,7 @@ export function PeruDepartmentMap({
       )}
 
       {loading && (
-        <div className="absolute inset-0 bg-white/50 z-[1001] flex items-center justify-center backdrop-blur-md">
+        <div className="absolute inset-0 bg-white/50 z-1001 flex items-center justify-center backdrop-blur-md">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
         </div>
       )}
@@ -181,6 +181,7 @@ export function PeruDepartmentMap({
         ref={mapRef} 
         className="w-full flex-1 z-10 bg-transparent touch-pan-y" 
         style={{ touchAction: 'none' }} 
+
       />
     </Card>
   );
