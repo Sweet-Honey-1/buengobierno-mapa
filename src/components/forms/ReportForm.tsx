@@ -1,35 +1,33 @@
-
+// src/components/forms/ReportForm.tsx
 import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
-import {type Ubigeo, provinciasPeru } from '../../data/ubigeo';
+import { type Ubigeo, provinciasPeru } from '../../data/ubigeo';
 import { submitReport } from '../../lib/api'; 
 
 export const ReportForm = () => {
-  // Estados de los campos del formulario
+  // Estados del formulario
   const [nombre, setNombre] = useState<string>('');
   const [dolencia, setDolencia] = useState<string>('');
   
-  // Estados del autocompletado de provincias
+  // Estados del autocompletado
   const [busqueda, setBusqueda] = useState<string>('');
   const [resultadosBusqueda, setResultadosBusqueda] = useState<Ubigeo[]>([]);
   const [provinciaSeleccionada, setProvinciaSeleccionada] = useState<Ubigeo | null>(null);
   
-  // Estado para bloquear el botón mientras se envía
+  // Estados de control y UI
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  // Estados para el Toast (Notificación flotante)
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+  const [isVisible, setIsVisible] = useState<boolean>(true); // Controla el bloqueo de la web
 
-  // Efecto para ocultar el Toast después de 4 segundos
   useEffect(() => {
     if (toast) {
-      const timer = setTimeout(() => {
-        setToast(null);
-      }, 4000);
+      const timer = setTimeout(() => setToast(null), 4000);
       return () => clearTimeout(timer);
     }
   }, [toast]);
 
-  // Manejador del buscador de provincias
+  // Si el usuario ya envió el reporte, el componente deja de renderizarse
+  if (!isVisible) return null;
+
   const handleBusquedaProvincia = (e: ChangeEvent<HTMLInputElement>) => {
     const texto = e.target.value;
     setBusqueda(texto);
@@ -45,15 +43,13 @@ export const ReportForm = () => {
     }
   };
 
-  // Al hacer clic en una provincia de la lista
   const seleccionarProvincia = (item: Ubigeo) => {
     setProvinciaSeleccionada(item);
     setBusqueda(item.provincia); 
     setResultadosBusqueda([]); 
-    if (toast?.type === 'error') setToast(null); // Quita el error si ya seleccionó algo
+    if (toast?.type === 'error') setToast(null);
   };
 
-  // Formateador exacto para tu backend: EJ: 'AREQUIPA-AREQUIPA'
   const formatearUbicacion = (provincia: string, region: string): string => {
     const cleanStr = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const provFormat = cleanStr(provincia).toUpperCase().replace(/\s+/g, '');
@@ -61,7 +57,6 @@ export const ReportForm = () => {
     return `${provFormat}-${regFormat}`;
   };
 
-  // Envío del formulario
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -73,77 +68,75 @@ export const ReportForm = () => {
     setIsSubmitting(true);
     const ubicacionCanonica = formatearUbicacion(provinciaSeleccionada.provincia, provinciaSeleccionada.region);
 
-    const payload = {
-      nombre,
-      ubicacion: ubicacionCanonica, // Match con tu SubmissionPayload en api.ts
-      dolencia
-    };
-
     try {
-      // Llamada a tu API centralizada
-      await submitReport(payload);
+      await submitReport({
+        nombre,
+        ubicacion: ubicacionCanonica,
+        dolencia
+      });
       
-      // Éxito: Mostrar notificación y limpiar el formulario
       setToast({ message: "¡Reporte ciudadano registrado correctamente!", type: 'success' });
-      setNombre('');
-      setDolencia('');
-      setBusqueda('');
-      setProvinciaSeleccionada(null);
+      
+      // Esperamos 1.5s para que vea el éxito antes de quitar el modal
+      setTimeout(() => {
+        setIsVisible(false);
+      }, 1500);
       
     } catch (err) {
-      console.error("Error al enviar a Supabase:", err);
-      setToast({ message: "Ocurrió un error al enviar el reporte. Inténtalo de nuevo.", type: 'error' });
-    } finally {
+      console.error("Error al enviar:", err);
+      setToast({ message: "Error al enviar el reporte. Inténtalo de nuevo.", type: 'error' });
       setIsSubmitting(false);
     }
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-red-100 relative">
-        <h2 className="text-2xl font-bold text-red-700 mb-2">Registrar dolencia ciudadana</h2>
-        <p className="text-gray-500 mb-6 text-sm">Este formulario nos ayuda a poder saber nuestra realidad de manera eficaz en base a datos aportados por los peruanos. Puedes completarlo de manera anonima lo que nos importa es poder ayudar a que tu dolencia resuene en todo el territorio Peruano.</p>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-neutral-900/70 backdrop-blur-md overflow-y-auto">
+      <form 
+        onSubmit={handleSubmit} 
+        className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-red-100 p-8 relative animate-in zoom-in-95 duration-300"
+      >
+        <h2 className="text-3xl font-black text-red-700 mb-2 tracking-tighter uppercase">Mapeo Social del Perú</h2>
+        <p className="text-gray-500 mb-8 text-sm leading-relaxed">
+          Para acceder a los datos en tiempo real, necesitamos tu participación. 
+          Tu dolencia nos ayuda a entender la realidad de tu zona de manera eficaz. 
+          Puedes participar de manera anónima.
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Nombre */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+            <label className="block text-xs font-black text-gray-400 uppercase mb-1">Nombre o Alias</label>
             <input 
-              type="text" 
-              required
-              value={nombre}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-400"
-              placeholder="Tu nombre"
+              type="text" required value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-red-400 font-medium"
+              placeholder="Ej. Anónimo"
               disabled={isSubmitting}
             />
           </div>
 
-          {/* Provincia (Buscador) */}
+          {/* Provincia */}
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+            <label className="block text-xs font-black text-gray-400 uppercase mb-1">Provincia</label>
             <input 
-              type="text" 
-              required
-              value={busqueda}
+              type="text" required value={busqueda}
               onChange={handleBusquedaProvincia}
-              className={`w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-400 transition-colors ${
-                toast?.type === 'error' && !provinciaSeleccionada ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              className={`w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-red-400 font-medium transition-colors ${
+                toast?.type === 'error' && !provinciaSeleccionada ? 'border-red-500 bg-red-50' : 'border-gray-200'
               }`}
-              placeholder="Ej. Arequipa, Trujillo..."
+              placeholder="Busca tu provincia..."
               autoComplete="off"
               disabled={isSubmitting}
             />
-            
             {resultadosBusqueda.length > 0 && (
-              <ul className="absolute z-10 w-full bg-white border border-gray-200 mt-1 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              <ul className="absolute z-50 w-full bg-white border border-gray-100 mt-2 rounded-xl shadow-2xl max-h-48 overflow-y-auto">
                 {resultadosBusqueda.map((item, index) => (
                   <li 
                     key={index}
                     onClick={() => seleccionarProvincia(item)}
-                    className="px-4 py-2 hover:bg-red-50 cursor-pointer text-sm text-gray-700"
+                    className="px-4 py-3 hover:bg-red-50 cursor-pointer text-sm text-gray-700 border-b border-gray-50 last:border-none"
                   >
-                    <span className="font-semibold">{item.provincia}</span> 
+                    <span className="font-bold text-gray-900">{item.provincia}</span> 
                     <span className="text-gray-400 ml-2">({item.region})</span>
                   </li>
                 ))}
@@ -154,68 +147,45 @@ export const ReportForm = () => {
 
         {/* Dolencia */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Dolencia</label>
+          <label className="block text-xs font-black text-gray-400 uppercase mb-1">Tu dolencia ciudadana</label>
           <textarea 
-            required
-            value={dolencia}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setDolencia(e.target.value)}
-            className="w-full border border-red-200 rounded-lg p-3 h-32 focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
-            placeholder="Describe el problema en tu zona"
+            required value={dolencia}
+            onChange={(e) => setDolencia(e.target.value)}
+            className="w-full border border-gray-200 rounded-xl p-4 h-32 focus:outline-none focus:ring-2 focus:ring-red-400 resize-none font-medium"
+            placeholder="Cuentanos tu dolencia como peruano"
             disabled={isSubmitting}
           />
         </div>
 
-        {/* Footer del Formulario */}
-        <div className="flex justify-between items-center mt-6">
-          <span className="text-sm text-gray-500">
-            Ubicación canónica: <span className="font-semibold text-red-600">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-gray-400 uppercase">Ubicación a registrar</span>
+            <span className="text-sm font-bold text-red-600">
               {provinciaSeleccionada 
                 ? formatearUbicacion(provinciaSeleccionada.provincia, provinciaSeleccionada.region) 
-                : 'Pendiente de selección'}
+                : 'Selecciona una provincia'}
             </span>
-          </span>
+          </div>
           <button 
             type="submit"
             disabled={isSubmitting}
-            className="bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
+            className="w-full sm:w-auto bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white font-black py-4 px-10 rounded-xl transition-all shadow-lg shadow-red-200 uppercase text-sm tracking-widest"
           >
-            {isSubmitting ? 'Enviando...' : 'Enviar reporte'}
+            {isSubmitting ? 'Enviando...' : 'Acceder al Dashboard'}
           </button>
         </div>
       </form>
 
-      {/* Componente Toast Personalizado (Éxito y Error) */}
+      {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className={`flex items-center gap-3 bg-white border-l-4 shadow-xl rounded-lg px-4 py-3 min-w-75 ${
+        <div className="fixed bottom-6 right-6 z-[10000] animate-in slide-in-from-right-5 fade-in">
+          <div className={`flex items-center gap-3 bg-white shadow-2xl rounded-2xl px-6 py-4 border-l-4 ${
             toast.type === 'error' ? 'border-red-500' : 'border-green-500'
           }`}>
-            {toast.type === 'error' ? (
-              <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            )}
-            
-            <div>
-              <p className={`text-sm font-bold ${toast.type === 'error' ? 'text-gray-800' : 'text-green-800'}`}>
-                {toast.type === 'error' ? 'Error de validación' : '¡Completado!'}
-              </p>
-              <p className="text-sm text-gray-600">{toast.message}</p>
-            </div>
-            
-            <button 
-              onClick={() => setToast(null)}
-              className="ml-auto text-gray-400 hover:text-gray-600"
-            >
-              &times;
-            </button>
+            <p className="text-sm font-bold text-gray-800">{toast.message}</p>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
-}
+};

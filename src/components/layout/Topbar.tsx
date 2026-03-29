@@ -21,7 +21,7 @@ export function Topbar({
         <Badge className="bg-white/20 text-red-500 hover:bg-white/30">Mapa social interactivo</Badge>
         <div>
           <h1 className="text-3xl font-black tracking-tight md:text-5xl">
-            Perú en tiempo casi real
+            Perú en tiempo real
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-red-50/90 md:text-base">
             Escucha el lamento del pueblo peruano.
