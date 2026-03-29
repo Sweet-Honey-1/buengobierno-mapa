@@ -19,8 +19,6 @@ export function PeruDepartmentMap({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log(error)
-
   const maxScore = useMemo(() => {
     const scores = Object.values(departments).map((d) => d?.totalScore ?? 0).filter(Boolean);
     return Math.max(1, ...scores);
@@ -72,7 +70,7 @@ export function PeruDepartmentMap({
         }
         initMap();
       } catch (err) {
-        setError("Error cargando el mapa.");
+        setError("Error cargando librerías de mapa.");
         setLoading(false);
       }
     };
@@ -93,9 +91,9 @@ export function PeruDepartmentMap({
       mapInstance.current = L.map(mapRef.current, { 
         zoomControl: false,
         attributionControl: false,
-        scrollWheelZoom: true, // RE-HABILITADO: Zoom con rueda/scroll
-        dragging: true,        // RE-HABILITADO: Arrastre
-        touchZoom: true,       // RE-HABILITADO: Zoom táctil (pinch)
+        scrollWheelZoom: true,
+        dragging: true,
+        touchZoom: true,
         doubleClickZoom: true
       }).setView([-9.19, -75.01], 5);
       
@@ -104,6 +102,7 @@ export function PeruDepartmentMap({
 
     try {
       const response = await fetch('https://raw.githubusercontent.com/juaneladio/peru-geojson/master/peru_departamental_simple.geojson');
+      if (!response.ok) throw new Error("GeoJSON not found");
       const data = await response.json();
 
       geoJsonLayerRef.current = L.geoJSON(data, {
@@ -116,7 +115,6 @@ export function PeruDepartmentMap({
             mouseout: (e: any) => {
               if (geoJsonLayerRef.current) {
                 geoJsonLayerRef.current.resetStyle(e.target);
-                // Re-aplicamos el estilo base para mantener la selección
                 e.target.setStyle(styleFeature(feature));
               }
             },
@@ -126,7 +124,6 @@ export function PeruDepartmentMap({
                 onSelectDepartment(code);
                 mapInstance.current.fitBounds(e.target.getBounds(), { padding: [50, 50], maxZoom: 7 });
               }
-              // Evitamos que el click se propague al mapa base
               L.DomEvent.stopPropagation(e);
             }
           });
@@ -135,7 +132,7 @@ export function PeruDepartmentMap({
 
       mapInstance.current.fitBounds(geoJsonLayerRef.current.getBounds());
     } catch (err) {
-      setError("No se pudo cargar el mapa.");
+      setError("No se pudo cargar la geografía del Perú.");
     } finally {
       setLoading(false);
     }
@@ -160,6 +157,16 @@ export function PeruDepartmentMap({
           <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#fef08a] rounded-sm"></div> BAJO</div>
         </div>
       </div>
+
+      {/* RE-INCIDENCIA DE ERROR (Badge/Alerta) */}
+      {error && (
+        <div className="absolute top-4 right-4 z-[1001] animate-in fade-in slide-in-from-top-2">
+          <div className="bg-red-600 text-white text-[10px] font-black px-4 py-2 rounded-full shadow-xl flex items-center gap-2">
+            <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+            {error}
+          </div>
+        </div>
+      )}
 
       {loading && (
         <div className="absolute inset-0 bg-white/50 z-[1001] flex items-center justify-center backdrop-blur-md">
