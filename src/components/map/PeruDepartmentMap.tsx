@@ -19,6 +19,8 @@ export function PeruDepartmentMap({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  console.log(error)
+
   const maxScore = useMemo(() => {
     const scores = Object.values(departments).map((d) => d?.totalScore ?? 0).filter(Boolean);
     return Math.max(1, ...scores);
