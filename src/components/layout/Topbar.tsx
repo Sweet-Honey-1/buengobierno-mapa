@@ -36,7 +36,7 @@ export function Topbar({
             {selectedDepartment ? departmentMeta[selectedDepartment].label : 'Ninguno'}
           </div>
         </div>
-        <Button onClick={onRefresh} className="bg-red text-red-700 0 font-bold">
+        <Button onClick={onRefresh} className="bg-red text-red-700 0 font-bold animate-bounce">
           {isRefreshing ? 'Actualizando...' : 'Actualizar dashboard'}
         </Button>
       </div>
