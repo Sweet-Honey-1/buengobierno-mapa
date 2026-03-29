@@ -16,7 +16,15 @@ export const ReportForm = () => {
   // Estados de control y UI
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
-  const [isVisible, setIsVisible] = useState<boolean>(true); // Controla el bloqueo de la web
+  
+  // NUEVO: Inicialización perezosa (lazy) comprobando el localStorage
+  const [isVisible, setIsVisible] = useState<boolean>(() => {
+    // Si estamos en el navegador y ya completó el reporte, inicializamos en false
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('mapeoSocial_reporte_completado') !== 'true';
+    }
+    return true;
+  });
 
   useEffect(() => {
     if (toast) {
@@ -76,6 +84,9 @@ export const ReportForm = () => {
       });
       
       setToast({ message: "¡Reporte ciudadano registrado correctamente!", type: 'success' });
+      
+      // NUEVO: Guardamos en LocalStorage para futuras visitas
+      localStorage.setItem('mapeoSocial_reporte_completado', 'true');
       
       // Esperamos 1.5s para que vea el éxito antes de quitar el modal
       setTimeout(() => {
